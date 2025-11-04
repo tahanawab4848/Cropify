@@ -16,11 +16,12 @@ export default function Weather() {
   ];
 
   const mapRegions = [
-    { name: "Punjab", condition: "heat" as const },
-    { name: "Sindh", condition: "normal" as const },
-    { name: "Balochistan", condition: "heat" as const },
-    { name: "KPK", condition: "rain" as const },
-    { name: "Kashmir", condition: "rain" as const },
+    { name: "Punjab", condition: "heat" as const, temp: 34 },
+    { name: "Sindh", condition: "normal" as const, temp: 28 },
+    { name: "Balochistan", condition: "heat" as const, temp: 36 },
+    { name: "KPK", condition: "rain" as const, temp: 25 },
+    { name: "Kashmir", condition: "rain" as const, temp: 22 },
+    { name: "Gilgit-Baltistan", condition: "normal" as const, temp: 18 },
   ];
 
   return (
