@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavigationProps {
   userRole?: "admin" | "farmer";
@@ -18,6 +19,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ userRole = "farmer", userName = "Ahmed Khan", userAvatar }: NavigationProps) {
+  const { me, logout } = useAuth();
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6">
@@ -53,28 +55,34 @@ export function Navigation({ userRole = "farmer", userName = "Ahmed Khan", userA
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={userAvatar} alt={userName} />
-                    <AvatarFallback>{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div className="hidden flex-col items-start lg:flex">
-                    <span className="text-sm font-medium">{userName}</span>
-                  </div>
-                  <Badge variant="secondary" className="hidden capitalize lg:inline-flex">
-                    {userRole}
-                  </Badge>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem data-testid="menu-profile">Profile</DropdownMenuItem>
-                <DropdownMenuItem data-testid="menu-settings">Settings</DropdownMenuItem>
-                <DropdownMenuItem data-testid="menu-logout">Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {me ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-2" data-testid="button-user-menu">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={userAvatar} alt={me.username} />
+                      <AvatarFallback>{(me.username || "U").slice(0,2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="hidden flex-col items-start lg:flex">
+                      <span className="text-sm font-medium">{me.username}</span>
+                    </div>
+                    <Badge variant="secondary" className="hidden capitalize lg:inline-flex">
+                      {me.role}
+                    </Badge>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href={me.role === "admin" ? "/admin" : "/dashboard"}>Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logout.mutate()} data-testid="menu-logout">Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
 
             <div className="md:hidden">
               <DropdownMenu>

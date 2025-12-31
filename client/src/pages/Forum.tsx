@@ -4,13 +4,23 @@ import { ForumPostCard } from "@/components/ForumPostCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import farmerAvatar from "@assets/generated_images/Pakistani_farmer_portrait_cce040c4.png";
 import adminAvatar from "@assets/generated_images/Admin_officer_portrait_8dcbd10c.png";
 
 export default function Forum() {
   const [search, setSearch] = useState("");
 
-  const forumPosts = [
+  const { toast } = useToast();
+
+  const [isNewPostOpen, setIsNewPostOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+
+  const [forumPosts, setForumPosts] = useState([
     {
       id: "1",
       title: "Best time to plant wheat this season?",
@@ -53,7 +63,32 @@ export default function Forum() {
       commentCount: 20,
       likeCount: 15,
     },
-  ];
+  ]);
+
+  const handleCreatePost = () => {
+    const title = newTitle.trim();
+    const content = newContent.trim();
+    if (!title || !content) {
+      toast({ title: "Missing fields", description: "Please add a title and content." });
+      return;
+    }
+    const newPost = {
+      id: String(Date.now()),
+      title,
+      content,
+      author: "Ahmed Khan",
+      authorRole: "farmer" as const,
+      authorAvatar: farmerAvatar,
+      timestamp: "just now",
+      commentCount: 0,
+      likeCount: 0,
+    };
+    setForumPosts((prev) => [newPost, ...prev]);
+    setIsNewPostOpen(false);
+    setNewTitle("");
+    setNewContent("");
+    toast({ title: "Post published", description: "Your post has been added to the forum." });
+  };
 
   const filteredPosts = forumPosts.filter((post) =>
     post.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -62,6 +97,7 @@ export default function Forum() {
   );
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       <Navigation userRole="farmer" userName="Ahmed Khan" userAvatar={farmerAvatar} />
       
@@ -84,7 +120,7 @@ export default function Forum() {
               data-testid="input-search-forum"
             />
           </div>
-          <Button data-testid="button-new-post">
+          <Button onClick={() => setIsNewPostOpen(true)} data-testid="button-new-post">
             <Plus className="h-4 w-4 mr-2" />
             New Post
           </Button>
@@ -107,5 +143,28 @@ export default function Forum() {
         )}
       </div>
     </div>
+
+    <Dialog open={isNewPostOpen} onOpenChange={setIsNewPostOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create New Post</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="post-title">Title</Label>
+            <Input id="post-title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Enter a descriptive title" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="post-content">Content</Label>
+            <Textarea id="post-content" value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={6} placeholder="Write your question or share an update" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setIsNewPostOpen(false)}>Cancel</Button>
+          <Button onClick={handleCreatePost}>Publish</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

@@ -11,6 +11,7 @@ import MarketRates from "@/pages/MarketRates";
 import Weather from "@/pages/Weather";
 import Forum from "@/pages/Forum";
 import AIAdvice from "@/pages/AIAdvice";
+import Login from "@/pages/Login";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/weather" component={Weather} />
       <Route path="/forum" component={Forum} />
       <Route path="/ai-advice" component={AIAdvice} />
+      <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
   );

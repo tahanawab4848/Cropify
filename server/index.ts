@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import session from "express-session";
+import MemoryStore from "memorystore";
 
 const app = express();
 
@@ -15,6 +17,20 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false }));
+
+// sessions for auth (cookie-based)
+const MemStore = MemoryStore(session);
+const sessionSecret = process.env.SESSION_SECRET || "dev-secret-change-me";
+app.use(
+  session({
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
+    resave: false,
+    saveUninitialized: false,
+    secret: sessionSecret,
+    store: new MemStore({ checkPeriod: 1000 * 60 * 60 }),
+    name: "sid",
+  })
+);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -74,7 +90,6 @@ app.use((req, res, next) => {
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });

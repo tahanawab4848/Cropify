@@ -1,17 +1,34 @@
+import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { MarketItemCard } from "@/components/MarketItemCard";
 import { WeatherCard } from "@/components/WeatherCard";
 import { AIAdviceCard } from "@/components/AIAdviceCard";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { TrendingUp, Package, MapPin } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import farmerAvatar from "@assets/generated_images/Pakistani_farmer_portrait_cce040c4.png";
 
 export default function FarmerDashboard() {
+  const { toast } = useToast();
   const trendingItems = [
     { id: "1", name: "Tomato", category: "Vegetable", currentPrice: 85, region: "Lahore", priceChange: 5.2 },
     { id: "2", name: "Potato", category: "Vegetable", currentPrice: 45, region: "Karachi", priceChange: -2.1 },
     { id: "3", name: "Onion", category: "Vegetable", currentPrice: 60, region: "Islamabad", priceChange: 3.8 },
   ];
+
+  const [advice, setAdvice] = useState("Tomato prices are rising steadily in Lahore market. Consider selling within the next 2 days to maximize profit. Weather forecast shows clear conditions, ideal for harvest and transport.");
+
+  const refreshAdvice = async () => {
+    try {
+      const res = await apiRequest("POST", "/api/ai/advice", { city: "Lahore" });
+      const data = await res.json();
+      setAdvice(data.advice || advice);
+      toast({ title: "Advice refreshed" });
+    } catch (e: any) {
+      toast({ title: "Failed to refresh", description: e?.message || "Unknown error" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,11 +106,11 @@ export default function FarmerDashboard() {
         <div>
           <h2 className="text-2xl font-semibold mb-4">AI Farming Advice</h2>
           <AIAdviceCard
-            advice="Tomato prices are rising steadily in Lahore market. Consider selling within the next 2 days to maximize profit. Weather forecast shows clear conditions, ideal for harvest and transport."
-            timestamp="2 hours ago"
+            advice={advice}
+            timestamp="just now"
             weatherBased
             priceBased
-            onRefresh={() => console.log("Refresh AI advice")}
+            onRefresh={refreshAdvice}
           />
         </div>
       </div>

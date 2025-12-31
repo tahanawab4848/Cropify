@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { AIAdviceCard } from "@/components/AIAdviceCard";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import farmerAvatar from "@assets/generated_images/Pakistani_farmer_portrait_cce040c4.png";
 
 export default function AIAdvice() {
-  const adviceList = [
+  const { toast } = useToast();
+  const [adviceList, setAdviceList] = useState([
     {
       id: "1",
       advice: "Tomato prices are rising steadily in Lahore market. Consider selling within the next 2 days to maximize profit. Weather forecast shows clear conditions, ideal for harvest and transport.",
@@ -32,7 +36,22 @@ export default function AIAdvice() {
       weatherBased: true,
       priceBased: true,
     },
-  ];
+  ]);
+
+  const refreshOne = async (id: string) => {
+    try {
+      const res = await apiRequest("POST", "/api/ai/advice", {});
+      const data = await res.json();
+      setAdviceList((prev) => prev.map((a) => a.id === id ? {
+        ...a,
+        advice: data.advice || a.advice,
+        timestamp: "just now",
+      } : a));
+      toast({ title: "Advice refreshed" });
+    } catch (e: any) {
+      toast({ title: "Failed to refresh", description: e?.message || "Unknown error" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +73,7 @@ export default function AIAdvice() {
               timestamp={advice.timestamp}
               weatherBased={advice.weatherBased}
               priceBased={advice.priceBased}
-              onRefresh={() => console.log(`Refresh advice: ${advice.id}`)}
+              onRefresh={() => refreshOne(advice.id)}
             />
           ))}
         </div>
