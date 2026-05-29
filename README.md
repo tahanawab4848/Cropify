@@ -2,9 +2,7 @@
 
 **A premium, modern web application for agricultural data management**
 
-![Cropify Home Mockup](file:///c:/Users/TAHA/.gemini/antigravity/brain/6e9af3ed-647c-4650-b401-dad6117e30bc/cropify_home_mockup_1780050008616.png)
 
----
 
 ## Table of Contents
 
